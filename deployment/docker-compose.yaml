@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile.api
+    command: >
+      sh -c "python -m app.seed_data && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    working_dir: /code/backend
+    volumes:
+      - ../backend:/code/backend
+    env_file:
+      - ../backend/.env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: menulink_db
+    environment:
+      POSTGRES_USER: menulink
+      POSTGRES_PASSWORD: menulink
+      POSTGRES_DB: menulink
+    ports:
+      - "5433:5432"   # expose Postgres on localhost:5433
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
